@@ -580,7 +580,6 @@ export async function fillSequential() {
 
             output += buffer.shift();
         }
-        console.log('Finished reading the file.');
     } catch (error: any) {
         console.error(`Error reading file: ${error.message}`);
     }
