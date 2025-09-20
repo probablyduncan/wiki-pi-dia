@@ -19,7 +19,7 @@ const html = await marked.parseInline(output, { renderer, async: true });
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="format-detection" content="telephone=no">
+		<meta name="format-detection" content="telephone=no" />
 
 		<link
 			rel="apple-touch-icon"
@@ -90,13 +90,20 @@ const html = await marked.parseInline(output, { renderer, async: true });
 
 			position: relative;
 			z-index: 1;
+		}
 
-			&:hover,
-			&:focus-visible {
+		@media screen and (hover: hover) {
+			a:hover {
 				z-index: 2;
 				color: white;
 				background-color: var(--color);
 			}
+		}
+
+		a:focus-visible {
+			z-index: 2;
+			color: white;
+			background-color: var(--color);
 		}
 	</style>
 </html>
