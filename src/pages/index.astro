@@ -65,8 +65,9 @@ const html = await marked.parseInline(output, { renderer, async: true });
 		}
 
 		main {
-			width: 100%;
+			width: calc(100% - 0.5em);
 			max-width: 55ch;
+			padding: 0.25em;
 			word-break: break-all;
 		}
 
@@ -87,8 +88,12 @@ const html = await marked.parseInline(output, { renderer, async: true });
 			display: inline-block;
 			margin: -0.125em -0.125em -0.2125em;
 
+			position: relative;
+			z-index: 1;
+
 			&:hover,
 			&:focus-visible {
+				z-index: 2;
 				color: white;
 				background-color: var(--color);
 			}
