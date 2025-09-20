@@ -1,16 +1,97 @@
 ---
+import { fillSequential } from "../lib/server";
+import { marked } from "marked";
 
+const output = await fillSequential();
+
+const renderer = (() => {
+	const renderer = new marked.Renderer();
+	renderer.link = ({ href, title = "#00e", text }) => {
+		return `<a href="${href}" title="${href}" style="--color: ${title};" target="_blank">${marked.parseInline(text)}</a>`;
+	};
+	return renderer;
+})();
+
+const html = await marked.parseInline(output, { renderer, async: true });
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="/favicon-16x16.png"
+		/>
+		<link rel="manifest" href="/site.webmanifest" />
+
+		<title>Wikiπdia</title>
+		<meta name="author" content="Duncan Petrie" />
+		<meta name="description" content="It's Wikipedia, crammed into PI." />
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>wikiπdia</h1>
+		<main set:html={html} />
 	</body>
+	<style is:global>
+		body {
+			font-family: monospace;
+			font-size: 2rem;
+
+			max-width: 55ch;
+			margin: 0 auto;
+
+			display: flex;
+			flex-flow: column;
+			align-items: center;
+		}
+
+		h1 {
+			text-align: center;
+		}
+
+		main {
+			width: 100%;
+			max-width: 55ch;
+			word-break: break-all;
+		}
+
+		a {
+			color: unset;
+			--color: black;
+
+			word-break: break-all;
+
+			text-decoration-style: solid;
+			text-decoration-thickness: 0.0875em;
+			text-underline-offset: 0.125em;
+			text-decoration-color: var(--color);
+
+			outline: none;
+
+			padding: 0.125em 0.125em 0.2125em;
+			display: inline-block;
+			margin: -0.125em -0.125em -0.2125em;
+
+			&:hover,
+			&:focus-visible {
+				color: white;
+				background-color: var(--color);
+			}
+		}
+	</style>
 </html>
