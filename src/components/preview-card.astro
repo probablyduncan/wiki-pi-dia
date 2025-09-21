@@ -1,0 +1,155 @@
+---
+
+---
+
+<div id="preview" hidden></div>
+<style>
+    #preview {
+        position: absolute;
+
+        --x: -9999px;
+        --y: -9999px;
+        top: var(--y);
+        left: var(--x);
+        width: 34ch;
+        max-height: 21ch;
+        overflow: hidden;
+
+        font-size: 1rem;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: white;
+        box-shadow: 2px 2px 10px black;
+        padding: 0 1em;
+        z-index: 100;
+
+        cursor: pointer;
+    }
+
+    #preview > :global(*) {
+        mask-image: linear-gradient(
+            to bottom,
+            rgb(0, 0, 0) calc(21ch - 6em),
+            rgba(0, 0, 0, 0) calc(21ch - 2em)
+        );
+    }
+</style>
+<noscript>
+    <style>
+        #preview {
+            display: none;
+        }
+    </style>
+</noscript>
+<script>
+    function initPreview() {
+        const preview = document.getElementById("preview") as HTMLElement;
+        if (!preview) return;
+
+        preview.addEventListener("mouseenter", onEnterPreview);
+        preview.addEventListener("mouseleave", onLeave);
+
+        document
+            .querySelectorAll("a[href^='https://wikipedia.org/'][data-key]")
+            .forEach((_e) => {
+                const a = _e as HTMLAnchorElement;
+                a.addEventListener("mouseenter", () => onEnterLink(a));
+                a.addEventListener("mouseleave", onLeave);
+                a.addEventListener("focus", () => onEnterLink(a));
+                // a.addEventListener("blur", onLeave);
+            });
+
+        let enterTimeoutId: NodeJS.Timeout | undefined;
+        let exitTimeoutId: NodeJS.Timeout | undefined;
+
+        function onEnterLink(a: HTMLAnchorElement) {
+            clearTimeout(enterTimeoutId);
+            clearTimeout(exitTimeoutId);
+            const previewPromise = getOrFetchWikiPreview(a.dataset.key);
+            enterTimeoutId = setTimeout(async () => {
+                const previewData = await previewPromise;
+
+                if (!previewData.html) return;
+
+                preview.innerHTML = previewData.html;
+                preview.hidden = false;
+
+                const x =
+                    a.offsetLeft + a.clientWidth > window.innerWidth / 2
+                        ? // when on right half of screen:
+                          a.offsetLeft + a.clientWidth - preview.clientWidth
+                        : // when on left half of screen:
+                          a.offsetLeft;
+
+                const y =
+                    a.offsetTop + a.clientHeight > window.innerHeight / 2
+                        ? // when on bottom half of screen:
+                          a.offsetTop - preview.clientHeight - 8
+                        : // when on top half of screen:
+                          a.offsetTop + a.clientHeight + 8;
+
+                preview.style.setProperty("--x", x + "px");
+                preview.style.setProperty("--y", y + "px");
+
+                preview.removeEventListener("click", onPreviewClick);
+                onPreviewClick = () => a.click();
+                preview.addEventListener("click", onPreviewClick);
+            }, 250);
+        }
+
+        let onPreviewClick = () => {};
+
+        function onEnterPreview() {
+            clearTimeout(exitTimeoutId);
+        }
+
+        function onLeave() {
+            clearTimeout(enterTimeoutId);
+            clearTimeout(exitTimeoutId);
+            exitTimeoutId = setTimeout(() => {
+                preview.hidden = true;
+                preview.innerHTML = "";
+                preview.style.removeProperty("--x");
+                preview.style.removeProperty("--y");
+            }, 50);
+        }
+
+        interface PreviewData {
+            html: string;
+            thumbnail?: {
+                source: string;
+                width: number;
+                height: number;
+            };
+        }
+
+        const cache = new Map<string, PreviewData>();
+        async function getOrFetchWikiPreview(
+            key: string | undefined,
+        ): Promise<PreviewData> {
+            if (key === undefined) {
+                return {
+                    html: "",
+                };
+            }
+
+            let previewData = cache.get(key);
+            if (previewData === undefined) {
+                const url =
+                    "https://en.wikipedia.org/api/rest_v1/page/summary/" + key;
+                previewData = await fetch(url)
+                    .then((response) => response.json())
+                    .then((json) => {
+                        const data: PreviewData = {
+                            html: json["extract_html"],
+                            thumbnail: json.thumbnail,
+                        };
+                        return data;
+                    });
+                cache.set(key, previewData!);
+            }
+            return previewData!;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", initPreview);
+</script>

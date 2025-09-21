@@ -160,7 +160,6 @@ const LINKS: Record<string, string[]> = {
         "Mario_Kart_8",
         "Infinity_symbol",
         "Figure-eight_knot",
-        "8½",
         "Gainesville_Eight",
         "Traitorous_eight",
         "The_Eight_(painters)",
@@ -350,6 +349,7 @@ const LINKS: Record<string, string[]> = {
     "747": ["747_Supertanker", "Boeing_Dreamlifter", "747_Wing_House"],
     "789": ["789_series", "Mathematical_joke"],
     "808": ["Roland_TR-808"],
+    "812": ["8½"],
     "897": ["897_Barcelona_raid"],
     "932": ["Code_page_932_(IBM)", "Code_page_932_(Microsoft_Windows)"],
     "996": ["996_working_hour_system"],
@@ -484,7 +484,7 @@ export async function fillSequential() {
      * returns a string like `[displayText](wiki.org/slug)`
      */
     function getWikiLink(displayText: string, slug: string) {
-        return "[" + displayText + "](https://wikipedia.org/wiki/" + slug + " '" + getColor() + "')";
+        return "[" + displayText + "](" + slug + " '" + getColor() + "')";
     }
 
     try {

@@ -1,4 +1,5 @@
 ---
+import PreviewCard from "../components/preview-card.astro";
 import { fillSequential } from "../lib/server";
 import { marked } from "marked";
 
@@ -7,7 +8,8 @@ const output = await fillSequential();
 const renderer = (() => {
 	const renderer = new marked.Renderer();
 	renderer.link = ({ href, title = "#00e", text }) => {
-		return `<a href="${href}" title="${href}" style="--color: ${title};" target="_blank">${marked.parseInline(text)}</a>`;
+		const pageHref = "https://wikipedia.org/wiki/" + href;
+		return `<a href="${pageHref}" title="${pageHref}" data-key="${href}" style="--color: ${title};" target="_blank">${marked.parseInline(text)}</a>`;
 	};
 	return renderer;
 })();
@@ -47,6 +49,7 @@ const html = await marked.parseInline(output, { renderer, async: true });
 	<body>
 		<h1>wikiπdia</h1>
 		<main set:html={html} />
+		<PreviewCard />
 	</body>
 	<style is:global>
 		body {
